@@ -1,0 +1,19 @@
+{{define "home"}}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.Title}}</title>
+</head>
+<body>
+    {{template "header" .}}
+
+    <h1>Welcome {{if .LoggedIn}}{{.Username}}{{else}}Guest{{end}}</h1>
+
+    {{if .LoggedIn}}
+        <p>You are logged in with roles: {{range .Roles}}{{.}}, {{end}}</p>
+    {{else}}
+        <p>Please log in to access more features.</p>
+    {{end}}
+</body>
+</html>
+{{end}}

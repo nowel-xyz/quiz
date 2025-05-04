@@ -1,0 +1,21 @@
+{{/* Define a template named "quizForm" */}}
+{{define "quizForm"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{.Title}}</title>
+</head>
+<body>
+  {{/* Include the header by its define name */}}
+  {{template "header" .}}
+
+  <div id="quiz-container">
+    <p>Loading...</p>
+  </div>
+
+  <script src="/static/ws.js"></script>
+</body>
+</html>
+{{end}}
