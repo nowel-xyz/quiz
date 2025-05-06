@@ -1,9 +1,8 @@
-package routers
+package api
+
 
 import (
-	"bytes"
 	"context"
-	"html/template"
 	"os"
 	"strings"
 	"time"
@@ -34,39 +33,11 @@ func sendMail(to, subject, body string) error {
 	return d.DialAndSend(m)
 }
 
-func SetupAuthRoutes(app *fiber.App) {
+func SetupAuthRoutes(router fiber.Router) {
 	users := database.Database.Collection("users")
 	jwtKey := []byte(os.Getenv("SECRET_KEY"))
 
-	// Setup templates for login and register pages
-	tmpl := template.Must(
-		template.New("auth").
-			ParseFiles(
-				"./views/header.html",
-				"./views/auth.html", // The auth template
-			),
-	)
-
-	// Render the login page
-	app.Get("/login", func(c *fiber.Ctx) error {
-		var buf bytes.Buffer
-		if err := tmpl.ExecuteTemplate(&buf, "login", nil); err != nil {
-			return c.Status(500).SendString("Template execution error: " + err.Error())
-		}
-		return c.Type("html").Send(buf.Bytes())
-	})
-
-	// Render the register page
-	app.Get("/register", func(c *fiber.Ctx) error {
-		var buf bytes.Buffer
-		if err := tmpl.ExecuteTemplate(&buf, "register", nil); err != nil {
-			return c.Status(500).SendString("Template execution error: " + err.Error())
-		}
-		return c.Type("html").Send(buf.Bytes())
-	})
-
-	// Handle registration logic
-	app.Post("/register", func(c *fiber.Ctx) error {
+	router.Post("/register", func(c *fiber.Ctx) error {
 		type req struct {
 			Username string `json:"username"`
 			Password string `json:"password"`
@@ -121,7 +92,7 @@ func SetupAuthRoutes(app *fiber.App) {
 	})
 
 	// Handle login logic
-	app.Post("/login", func(c *fiber.Ctx) error {
+	router.Post("/login", func(c *fiber.Ctx) error {
 		type req struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`
@@ -199,7 +170,7 @@ func SetupAuthRoutes(app *fiber.App) {
 	})
 
 	// Logout
-	app.Get("/logout", func(c *fiber.Ctx) error {
+	router.Get("/logout", func(c *fiber.Ctx) error {
 		c.ClearCookie("sessionToken")
 		return c.Redirect(os.Getenv("FRONTEND") + "/")
 	})

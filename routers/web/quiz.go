@@ -1,5 +1,4 @@
-// routers/quiz.go
-package routers
+package web
 
 import (
     "bytes"
@@ -19,7 +18,7 @@ type QuizData struct {
     Questions []Question
 }
 
-func SetupQuizRoutes(app *fiber.App) {
+func SetupQuizRoutes(router fiber.Router) {
     // Parse only header.html and quizForm.html, using QuizForm as the root
     tmpl := template.Must(
         template.New("quizForm").
@@ -29,7 +28,7 @@ func SetupQuizRoutes(app *fiber.App) {
             ),
     )
 
-    app.Get("/quiz", func(c *fiber.Ctx) error {
+    router.Get("/quiz", func(c *fiber.Ctx) error {
         quiz := QuizData{
             Title: "Trivia Quiz",
             Questions: []Question{
@@ -47,7 +46,7 @@ func SetupQuizRoutes(app *fiber.App) {
         return c.Type("html").Send(buf.Bytes())
     })
 
-    app.Post("/quiz", func(c *fiber.Ctx) error {
+    router.Post("/quiz", func(c *fiber.Ctx) error {
         answers := make(map[string]string)
         c.Request().PostArgs().VisitAll(func(k, v []byte) {
             answers[string(k)] = string(v)

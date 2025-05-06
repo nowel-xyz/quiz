@@ -27,10 +27,12 @@ func main() {
 
 	// Register all routers
 	app.Static("/static", "./public")
-	routers.SetupQuizRoutes(app)
-	routers.SetupAuthRoutes(app)
-	routers.SetupWebSocket(app)
-	routers.SetupHomeRoutes(app)
+
+	api := app.Group("/api")
+	v1 := api.Group("/v1")
+	routers.SetupAPIRoutes(v1)
+	routers.SetupWebRoutes(app)
+
 
 	log.Fatal(app.Listen(":3000"))
 }
