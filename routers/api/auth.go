@@ -1,6 +1,5 @@
 package api
 
-
 import (
 	"context"
 	"os"
@@ -88,7 +87,7 @@ func SetupAuthRoutes(router fiber.Router) {
 
 		go sendMail(body.Email, "Registration", "Welcome to our platform, "+body.Username)
 
-		return c.Redirect("/login", fiber.StatusSeeOther);
+		return c.Redirect("/login", fiber.StatusSeeOther)
 	})
 
 	// Handle login logic
@@ -154,13 +153,13 @@ func SetupAuthRoutes(router fiber.Router) {
 			Name:     "sessionToken",
 			Value:    token,
 			HTTPOnly: true,
-			Secure:   true,
+			Secure:   false,
 			Expires:  time.Now().Add(7 * 24 * time.Hour),
 		})
 
 		go sendMail(user.Email, subject, text)
 
-		return c.Redirect("/", fiber.StatusSeeOther);
+		return c.Redirect("/", fiber.StatusSeeOther)
 	})
 
 	// Logout
