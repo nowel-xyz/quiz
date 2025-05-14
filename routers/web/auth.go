@@ -11,7 +11,7 @@ func SetupAuthRoutes(app *fiber.App) {
 		template.New("auth").
 			ParseFiles(
 				"./views/header.html",
-				"./views/auth.html", // The auth template
+				"./views/auth.html",
 			),
 	)
 

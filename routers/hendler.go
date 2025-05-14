@@ -19,7 +19,7 @@ func SetupWebRoutes(app *fiber.App) {
 func SetupAPIRoutes(v1 fiber.Router) {
     api.SetupAuthRoutes(v1)
 
-	lobbyRouter := v1.Group("/lobby", middleware.RequireAuth(),)
+	lobbyRouter := v1.Group("/lobby", middleware.RequireAuth())
     lobby.SetupLobbyRoutes(lobbyRouter)
 
 }

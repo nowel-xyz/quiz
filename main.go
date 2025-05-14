@@ -27,6 +27,7 @@ func main() {
 
 	// Register all routers
 	app.Static("/static", "./public")
+	app.Static("/css", "./css")
 
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
@@ -45,5 +46,3 @@ func init() {
 
 	log.Println("SECRET_KEY from env:", os.Getenv("SECRET_KEY"))
 }
-
-

@@ -88,7 +88,7 @@ func SetupAuthRoutes(router fiber.Router) {
 
 		go sendMail(body.Email, "Registration", "Welcome to our platform, "+body.Username)
 
-		return c.JSON(fiber.Map{"message": "registered"})
+		return c.Redirect("/login", fiber.StatusSeeOther);
 	})
 
 	// Handle login logic
@@ -160,13 +160,7 @@ func SetupAuthRoutes(router fiber.Router) {
 
 		go sendMail(user.Email, subject, text)
 
-		return c.JSON(fiber.Map{
-			"message": "login success",
-			"user": fiber.Map{
-				"username": user.Username,
-				"roles":    user.Roles,
-			},
-		})
+		return c.Redirect("/", fiber.StatusSeeOther);
 	})
 
 	// Logout

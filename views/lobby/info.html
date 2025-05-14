@@ -1,0 +1,57 @@
+{{define "lobby_info"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{.Title}}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+    }
+    h1 {
+      color: #333;
+    }
+    .lobby-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .member-list {
+      margin-top: 1rem;
+    }
+    .member-list ul {
+      padding-left: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>{{.Title}}</h1>
+
+  {{with .Lobby}}
+  <div class="lobby-info">
+    <p><strong>Lobby ID:</strong> {{.ID}}</p> <!-- Accessing .ID instead of .LobbyID -->
+    <p><strong>Host ID:</strong> {{.HostID}}</p>
+    <p><strong>Quiz ID:</strong> {{.QuizID}}</p>
+    <p><strong>Game Started:</strong> {{if .Started}} Yes {{else}} No {{end}}</p> <!-- Add Started field if needed -->
+    <p><strong>Member Limit:</strong> {{.Settings.MemberLimit}}</p>
+    <p><strong>Number of Members:</strong> {{len .Members}}</p>
+
+    <div class="member-list">
+      <h3>Players:</h3>
+      <ul>
+        {{range .Members}}
+          <li>{{.}}</li>
+        {{end}}
+      </ul>
+    </div>
+  </div>
+  {{else}}
+    <p>No lobby data available.</p>
+  {{end}}
+
+</body>
+</html>
+{{end}}

@@ -15,30 +15,13 @@ import (
 
 func SetupLobbyCreateRoutes(router fiber.Router) {
 
-	type Settings struct {
-		MemberLimit int `json:"member_limit"`
-	}
 
-	type LobbyInvite struct {
-		Code string `json:"code"`
-	}
-
-	type Lobby struct {
-		ID        string      `json:"lobby_id"`
-		Invite    LobbyInvite `json:"lobby_invite"`
-		HostID    string      `json:"host_id"`
-		QuizID    string      `json:"quiz_id"`
-		Members   []string    `json:"members"`
-		Settings  Settings    `json:"settings"`
-		CreatedAt string      `json:"created_at"`
-		UpdatedAt string      `json:"updated_at"`
-	}
 
 	router.Post("/create", func(c *fiber.Ctx) error {
 		user := c.Locals("user").(models.User)
 		type req struct {
 			QuizID   string   `json:"quiz_id"`
-			Settings Settings `json:"settings"`
+			Settings utils.Settings `json:"settings"`
 		}
 
 		var body req
@@ -50,10 +33,11 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		lobbyId := uuid.NewString()
 
-		newLobby := Lobby{
-			ID: uuid.NewString(),
-			Invite: LobbyInvite{
+		newLobby := utils.Lobby{
+			ID: lobbyId,
+			Invite: utils.LobbyInvite{
 				Code: code,
 			},
 			HostID:    user.UserID,
@@ -64,7 +48,7 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			UpdatedAt: time.Now().Format(time.RFC3339),
 		}  
 
-		key := "lobby:" + newLobby.Invite.Code
+		key := "lobby:" + lobbyId
 
 		// 2) JSON‑marshal the lobby struct
 		blob, err := json.Marshal(newLobby)
@@ -84,7 +68,7 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 		if err != nil {
 			log.Println("redis get error:", err)
 		} else {
-			var stored Lobby
+			var stored utils.Lobby
 			if err := json.Unmarshal([]byte(raw), &stored); err != nil {
 				log.Println("json unmarshal error:", err)
 			} else {

@@ -1,6 +1,6 @@
 {{define "login"}}
 <h1>Login</h1>
-<form action="/login" method="POST">
+<form action="/api/v1/login" method="POST">
     <label>Email</label>
     <input type="email" name="email" required>
     <label>Password</label>
@@ -11,7 +11,7 @@
 
 {{define "register"}}
 <h1>Register</h1>
-<form action="/register" method="POST">
+<form action="/api/v1/register" method="POST">
     <label>Username</label>
     <input type="text" name="username" required>
     <label>Email</label>
@@ -21,3 +21,5 @@
     <button type="submit">Register</button>
 </form>
 {{end}}
+
+
