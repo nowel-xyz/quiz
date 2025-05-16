@@ -48,34 +48,30 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			UpdatedAt: time.Now().Format(time.RFC3339),
 		}  
 
-		key := "lobby:" + lobbyId
+		lobbyKey := "lobby:" + lobbyId
+		inviteKey := "invite:" + code
 
-		// 2) JSON‑marshal the lobby struct
+		// Marshal lobby data
 		blob, err := json.Marshal(newLobby)
 		if err != nil {
 			log.Println("json marshal error:", err)
 			return c.Status(fiber.StatusInternalServerError).SendString("internal error")
 		}
-	
-		// 3) Store it under that key
-		if err := database.Redis.Set(c.Context(), key, blob, 24*time.Hour).Err(); err != nil {
-			log.Println("redis set error:", err)
+
+		// Save lobby to Redis
+		if err := database.Redis.Set(c.Context(), lobbyKey, blob, 24*time.Hour).Err(); err != nil {
+			log.Println("redis set error (lobby):", err)
 			return c.Status(fiber.StatusInternalServerError).SendString("redis error")
 		}
-	
-		// 4) Read it back (for testing/logging)
-		raw, err := database.Redis.Get(c.Context(), key).Result()
-		if err != nil {
-			log.Println("redis get error:", err)
-		} else {
-			var stored utils.Lobby
-			if err := json.Unmarshal([]byte(raw), &stored); err != nil {
-				log.Println("json unmarshal error:", err)
-			} else {
-				log.Println("Lobby from Redis:", stored)
-			}
+
+		// Save invite code → lobby ID mapping
+		if err := database.Redis.Set(c.Context(), inviteKey, lobbyId, 24*time.Hour).Err(); err != nil {
+			log.Println("redis set error (invite code):", err)
+			return c.Status(fiber.StatusInternalServerError).SendString("invite code save error")
 		}
-	
+
+		log.Printf("Lobby created: lobbyId=%s inviteCode=%s", lobbyId, code)
+
 		return c.Status(fiber.StatusCreated).JSON(newLobby)
 	})
 }

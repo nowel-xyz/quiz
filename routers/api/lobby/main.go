@@ -7,5 +7,6 @@ import (
 func SetupLobbyRoutes(router fiber.Router) {
 	SetupLobbyCreateRoutes(router)
 	SetupLobbyInfoRoutes(router)
+	SetupLobbyJoinRoutes(router)
 
 }

@@ -6,7 +6,6 @@
 </head>
 <body>
     {{template "header" .}}
-
     <h1>Welcome {{if .LoggedIn}}{{.Username}}{{else}}Guest{{end}}</h1>
 
     {{if .LoggedIn}}
