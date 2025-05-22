@@ -10,28 +10,22 @@ import (
 	"github.com/nowel-xyz/quiz/routers/api/lobby/utils"
 )
 
-func GetLobbyData(c *fiber.Ctx, lobbyID string, user models.User) (*utils.Lobby, error) {
-	key := "lobby:" + lobbyID
+func GetLobbyMembersById(c *fiber.Ctx, lobbyID string, user models.User) (*utils.Lobby, error) {
 
-	raw, err := database.Redis.Get(c.Context(), key).Result()
+	// Step 2: Fetch full lobby data
+	lobbyKey := "lobby:" + lobbyID
+	raw, err := database.Redis.Get(c.Context(), lobbyKey).Result()
 	if err != nil {
-		log.Println("redis get error:", err)
+		log.Println("redis get error (lobby):", err)
 		return nil, fiber.NewError(fiber.StatusNotFound, "Lobby not found")
 	}
 
+	// Step 3: Unmarshal the JSON
 	var lobby utils.Lobby
 	if err := json.Unmarshal([]byte(raw), &lobby); err != nil {
 		log.Println("json unmarshal error:", err)
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to parse lobby data")
-	}
-
-	memberIDs := make([]string, len(lobby.Members))
-	for i, m := range lobby.Members {
-		memberIDs[i] = m.UserID
-	}
-	if !utils.ContainsMember(memberIDs, user.UserID) && lobby.HostID != user.UserID {
-		return nil, fiber.NewError(fiber.StatusForbidden, "You're not a member of this lobby")
-	}
+	}	
 
 	return &lobby, nil
 }

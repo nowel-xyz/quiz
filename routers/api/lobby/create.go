@@ -42,7 +42,12 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			},
 			HostID:    user.UserID,
 			QuizID:    body.QuizID,
-			Members:   []string{user.UserID},
+			Members:   []models.LobbyUser{
+				{
+					UserID:   user.UserID,
+					Username: user.Username,
+				},
+			},
 			Settings:  body.Settings,
 			CreatedAt: time.Now().Format(time.RFC3339),
 			UpdatedAt: time.Now().Format(time.RFC3339),

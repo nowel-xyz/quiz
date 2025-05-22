@@ -23,3 +23,11 @@ type User struct {
 	IPs      []IPEntry          `bson:"ips"`
 	Roles    []string           `bson:"roles"`
 }
+
+
+type LobbyUser struct {
+	UserID   string             `json:"id"`
+	Username string             `json:"username"`
+	Email    string             `json:"email"`
+	Roles    []string           `json:"roles"`
+}
