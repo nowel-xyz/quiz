@@ -1,14 +1,15 @@
 package middleware
 
 import (
-    "context"
-    "os"
+	"context"
+    "fmt"
+	"os"
 
-    "github.com/gofiber/fiber/v2"
-    "github.com/golang-jwt/jwt/v5"
-    "go.mongodb.org/mongo-driver/bson"
-    "github.com/nowel-xyz/quiz/database"
-    "github.com/nowel-xyz/quiz/database/models"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/nowel-xyz/quiz/database"
+	"github.com/nowel-xyz/quiz/database/models"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 
@@ -30,6 +31,9 @@ func RequireAuth() fiber.Handler {
             }
             return jwtKey, nil
         })
+
+        print("Token:", tok)
+        print("Parsed Token:", token.Valid)
         if err != nil || !token.Valid {
             return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid token"})
         }
@@ -40,11 +44,17 @@ func RequireAuth() fiber.Handler {
         if !ok {
             return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid claims"})
         }
-		
+
+                
         userID, ok := claims["id"].(string)
         if !ok {
             return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "invalid claims data"})
         }
+
+
+
+        fmt.Print("User ID from claims:", userID)
+
 
         // 4) Fetch the user document once
         var user models.User

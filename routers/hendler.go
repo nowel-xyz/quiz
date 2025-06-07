@@ -2,10 +2,9 @@ package routers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/nowel-xyz/quiz/routers/api"
 	"github.com/nowel-xyz/quiz/routers/api/lobby"
+    "github.com/nowel-xyz/quiz/routers/api/auth"
 	"github.com/nowel-xyz/quiz/routers/web"
-	"github.com/nowel-xyz/quiz/routers/middleware"
 )
 
 func SetupWebRoutes(app *fiber.App) {
@@ -17,10 +16,10 @@ func SetupWebRoutes(app *fiber.App) {
 }
 
 func SetupAPIRoutes(v1 fiber.Router) {
-    api.SetupAuthRoutes(v1)
+    lobby.SetupLobbyRoutes(v1)
 
-	lobbyRouter := v1.Group("/lobby", middleware.RequireAuth())
-    lobby.SetupLobbyRoutes(lobbyRouter)
+
+    auth.SetupAuthRoutes(v1)
 
 }
 

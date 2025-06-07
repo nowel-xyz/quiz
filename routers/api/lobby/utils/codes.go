@@ -7,7 +7,7 @@ import (
 
 const (
 	// The characters you want in your codes:
-	charset    = "23456789"
+	charset    = "123456789"
 	DefaultLen = 6
 )
 
