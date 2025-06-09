@@ -14,6 +14,8 @@ import (
 
 	"github.com/nowel-xyz/quiz/database"
 	"github.com/nowel-xyz/quiz/database/models"
+	"github.com/nowel-xyz/quiz/routers/api/auth/utils"
+
 )
 
 func SetupRegisterRoutes(router fiber.Router) {
@@ -46,7 +48,7 @@ func SetupRegisterRoutes(router fiber.Router) {
 			"id":    id,
 			"email": body.Email,
 		})
-		signedToken, _ := token.SignedString(jwtKey)
+		signedToken, _ := token.SignedString(utils.GetJWTKey())
 
 		ip := c.IP()
 		user := models.User{

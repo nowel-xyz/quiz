@@ -1,4 +1,6 @@
-const ws = new WebSocket("ws://localhost:3000/ws");
+const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+const host = window.location.host; 
+const ws = new WebSocket(`${protocol}://${host}/ws`);
 
 ws.onopen = () => {
   console.log("WebSocket connected");

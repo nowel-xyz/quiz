@@ -14,9 +14,9 @@ import (
 
 	"github.com/nowel-xyz/quiz/database"
 	"github.com/nowel-xyz/quiz/database/models"
+	"github.com/nowel-xyz/quiz/routers/api/auth/utils"
 )
 
-var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
 func sendMail(to, subject, body string) error {
 	mailUser := os.Getenv("MAIL_USER")
@@ -86,8 +86,15 @@ func SetupLoginRoutes(router fiber.Router) {
 
 		token := user.Cookie
 		if token == "" {
-			j := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"id": user.UserID, "email": user.Email})
-			token, _ = j.SignedString(jwtKey)
+			j := jwt.NewWithClaims(jwt.SigningMethodHS256, 
+				jwt.MapClaims{
+					"id": user.UserID, 
+					"email": user.Email, 
+					"exp": time.Now().Add(7 * 24 * time.Hour).Unix(),
+				},
+			)
+			
+			token, _ = j.SignedString(utils.GetJWTKey())
 			_, _ = users.UpdateOne(context.TODO(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"cookie": token}})
 		}
 

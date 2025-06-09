@@ -14,7 +14,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	err := database.Init("mongodb://localhost:27017", "kahoot")
+	err := database.Init()
 	if err != nil {
 		log.Fatal(err)
 	}
