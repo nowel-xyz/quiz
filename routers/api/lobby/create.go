@@ -41,12 +41,6 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			},
 			HostID:    user.UserID,
 			QuizID:    body.QuizID,
-			Members:   []models.LobbyUser{
-				{
-					UserID:   user.UserID,
-					Username: user.Username,
-				},
-			},
 			Settings:  body.Settings,
 			CreatedAt: time.Now().Format(time.RFC3339),
 			UpdatedAt: time.Now().Format(time.RFC3339),
@@ -65,13 +59,13 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 		// Save lobby to Redis
 		if err := database.Redis.Set(c.Context(), lobbyKey, blob, 24*time.Hour).Err(); err != nil {
 			log.Println("redis set error (lobby):", err)
-			return c.Status(fiber.StatusInternalServerError).SendString("redis error")
+			return c.Status(fiber.StatusInternalServerError).SendString("redis save lobby error")
 		}
 
 		// Save invite code → lobby ID mapping
 		if err := database.Redis.Set(c.Context(), inviteKey, lobbyId, 24*time.Hour).Err(); err != nil {
 			log.Println("redis set error (invite code):", err)
-			return c.Status(fiber.StatusInternalServerError).SendString("invite code save error")
+			return c.Status(fiber.StatusInternalServerError).SendString("redis save invite code error")
 		}
 
 		log.Printf("Lobby created: lobbyId=%s inviteCode=%s", lobbyId, code)

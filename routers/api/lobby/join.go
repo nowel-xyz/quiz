@@ -30,7 +30,12 @@ func SetupLobbyJoinRoutes(router fiber.Router) {
 		lobbyJoined, err := service_lobby.JoinLobbyByID(c, lobby.ID, user)
 		if err != nil {
 			log.Println("error joining lobby:", err)
-			return err // ✅ Same here
+
+			// on conflict, redirect to the known lobby.ID, NOT lobbyJoined
+			if fiberErr, ok := err.(*fiber.Error); ok && fiberErr.Code == fiber.StatusConflict {
+				return c.Redirect("/lobby/"+lobby.ID, fiber.StatusSeeOther)
+			}
+			return err
 		}
 
 		web.HubInstance.AddUserToLobby(user.ID.Hex(), lobbyJoined.ID)

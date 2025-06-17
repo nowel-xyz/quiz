@@ -129,6 +129,7 @@ func (h *Hub) BroadcastToLobby(lobbyID string, msg interface{}) {
 
 	// Broadcast only to users on the correct page
 	for client := range h.clients {
+		log.Printf("Hub: broadcasting to client %s for lobby %s user path %s", client.UserID, lobbyID, client.CurrentPath)
 		if client.Lobbies[lobbyID] && client.CurrentPath == "/lobby/"+lobbyID {
 			if err := client.Conn.WriteMessage(websocket.TextMessage, payloadToSend); err != nil {
 				log.Printf("Hub: write error to client %s: %v", client.UserID, err)
