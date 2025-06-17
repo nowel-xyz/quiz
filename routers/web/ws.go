@@ -1,34 +1,103 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/websocket/v2"
+	fiberws "github.com/gofiber/websocket/v2"
+	"github.com/nowel-xyz/quiz/database/models"
+	"github.com/nowel-xyz/quiz/routers/middleware"
+	"github.com/nowel-xyz/quiz/service/lobby"
+	"github.com/nowel-xyz/quiz/utils/web"
 )
 
-var clients = make(map[*websocket.Conn]bool)
+const (
+	pongWait   = 60 * time.Second
+	pingPeriod = (pongWait * 9) / 10
+)
 
+// SetupWebSocket configures the /ws endpoint with auth, heartbeat, and hub integration.
 func SetupWebSocket(app *fiber.App) {
-	app.Get("/ws", websocket.New(func(c *websocket.Conn) {
-		defer func() {
-			c.Close()
-			delete(clients, c)
-		}()
+	go web.HubInstance.Run()
 
-		clients[c] = true
+	app.Use("/ws", middleware.RequireAuth())
 
-		// Example: send an update when a new client connects
-		message := map[string]interface{}{
-			"type": "update",
-			"id":   "quiz-container",
-			"html": `<h2>New Quiz Question</h2><p>What's 2 + 2?</p>`,
+	app.Get("/ws", fiberws.New(func(wsConn *fiberws.Conn) {
+		raw := wsConn.Locals("user")
+		user, ok := raw.(models.User)
+		if !ok {
+			log.Println("ws: missing user in Locals")
+			wsConn.Close()
+			return
 		}
 
-		msgBytes, _ := json.Marshal(message)
-		if err := c.WriteMessage(websocket.TextMessage, msgBytes); err != nil {
-			log.Println("Error writing message:", err)
+		// Fetch all lobby IDs for the user from Redis
+		lobbyIDs, err := service_lobby.GetLobbyIDsForUser(context.Background(), user)
+		if err != nil {
+			log.Println("ws: failed to load user lobbies:", err)
+			wsConn.Close()
+			return
+		}
+
+		client := &web.Client{
+			UserID:  user.ID.Hex(),
+			Conn:    wsConn,
+			Lobbies: make(map[string]bool),
+		}
+		for _, lid := range lobbyIDs {
+			client.Lobbies[lid] = true
+		}
+
+		web.HubInstance.Register(client)
+		defer web.HubInstance.Unregister(client)
+
+		// WebSocket-level heartbeat (ping/pong frames)
+		wsConn.SetReadDeadline(time.Now().Add(pongWait))
+		wsConn.SetPongHandler(func(string) error {
+			return wsConn.SetReadDeadline(time.Now().Add(pongWait))
+		})
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		go func() {
+			for range ticker.C {
+				if err := wsConn.WriteMessage(fiberws.PingMessage, nil); err != nil {
+					return
+				}
+			}
+		}()
+
+		// Send welcome message
+		welcome := map[string]interface{}{ "type": "welcome", "user": user.Username }
+		if b, err := json.Marshal(welcome); err == nil {
+			wsConn.WriteMessage(fiberws.TextMessage, b)
+		}
+
+		// Main read loop
+		for {
+			_, msg, err := wsConn.ReadMessage()
+			if err != nil {
+				break
+			}
+
+			var req struct {
+				Action  string `json:"action"`
+				LobbyID string `json:"lobbyID"`
+			}
+			if err := json.Unmarshal(msg, &req); err != nil {
+				continue
+			}
+
+			switch req.Action {
+
+			case "ping":
+				pong := map[string]string{"type": "pong"}
+				if b, err := json.Marshal(pong); err == nil {
+					wsConn.WriteMessage(fiberws.TextMessage, b)
+				}
+			}
 		}
 	}))
 }

@@ -6,5 +6,24 @@
     <a href="/login">Login</a>
     <a href="/register">Register</a>
   </nav>
+
+  <form method="POST" action="/api/v1/lobby/create" style="display: inline;">
+    <button type="submit">Create Lobby</button>
+  </form>
+  <section>
+    <h2>Join Lobby</h2>
+    <form id="joinForm" method="POST">
+      <input type="text" id="inviteCode" name="invite_code" placeholder="Enter Invite Code" required />
+      <button type="submit">Join Lobby</button>
+    </form>
+  </section>
 </header>
+
+<script>
+  const form = document.getElementById('joinForm');
+  form.addEventListener('submit', function (e) {
+    const inviteCode = document.getElementById('inviteCode').value.trim();
+    form.action = `/api/v1/lobby/${encodeURIComponent(inviteCode)}/join`;
+  });
+</script>
 {{end}}

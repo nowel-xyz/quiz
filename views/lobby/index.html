@@ -53,17 +53,7 @@
     <p><strong>Member Limit:</strong> {{.Settings.MemberLimit}}</p>
     <p><strong>Number of Members:</strong> {{len .Members}}</p>
 
-    <div class="member-list">
-      <h3>Players:</h3>
-      {{if .Members}}
-      <ul>
-        {{range .Members}}
-          <li>{{.Username}} {{with .Email}}({{.}}){{end}}</li>
-        {{end}}
-      </ul>
-      {{else}}
-      <p>No players have joined yet.</p>
-      {{end}}
+    {{template "member-list" .}}
     </div>
   </div>
   {{else}}
@@ -73,4 +63,21 @@
 </body>
 <script src="/static/ws.js"></script>
 </html>
+{{end}}
+
+
+{{define "member-list"}}
+<div class="member-list" id="member-list">
+  <h3>Players:</h3>
+  {{if .Members}}
+  <ul>
+    {{range .Members}}
+      <li>{{.Username}} {{with .Email}}({{.}}){{end}}</li>
+    {{end}}
+  </ul>
+  {{else}}
+  <p>No players have joined yet.</p>
+  {{end}}
+</div>
+</div>
 {{end}}

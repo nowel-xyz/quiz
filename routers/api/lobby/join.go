@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/nowel-xyz/quiz/database/models"
 	"github.com/nowel-xyz/quiz/service/lobby"
+	"github.com/nowel-xyz/quiz/utils/web"
 )
 
 func SetupLobbyJoinRoutes(router fiber.Router) {
@@ -31,7 +32,14 @@ func SetupLobbyJoinRoutes(router fiber.Router) {
 			return err // ✅ Same here
 		}
 
-		return c.JSON(lobbyJoined)
+		web.HubInstance.AddUserToLobby(user.ID.Hex(), lobbyJoined.ID)
+		update := map[string]interface{}{
+			"type":    "member-list",
+			"lobbyID": lobbyJoined.ID,
+			"Members": lobbyJoined.Members,
+		}
+		web.HubInstance.BroadcastToLobby(lobbyJoined.ID, update)
+		return c.Redirect("/lobby/" + lobbyJoined.ID, fiber.StatusSeeOther)
 	})
 }
 

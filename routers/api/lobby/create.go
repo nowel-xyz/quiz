@@ -15,8 +15,6 @@ import (
 
 func SetupLobbyCreateRoutes(router fiber.Router) {
 
-
-
 	router.Post("/create", func(c *fiber.Ctx) error {
 		user := c.Locals("user").(models.User)
 		type req struct {
@@ -24,11 +22,12 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			Settings utils.Settings `json:"settings"`
 		}
 
-		var body req
-		if err := c.BodyParser(&body); err != nil {
-			return c.Status(400).SendString("bad request")
-		}
-
+		body := new(req)
+		if c.Request().Body() != nil && len(c.Request().Body()) > 0 {
+			if err := c.BodyParser(body); err != nil {
+				return c.Status(400).SendString("bad request")
+			}
+}
 		code, err := utils.GenerateCode(10)
 		if err != nil {
 			log.Fatal(err)
@@ -77,6 +76,6 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 
 		log.Printf("Lobby created: lobbyId=%s inviteCode=%s", lobbyId, code)
 
-		return c.Status(fiber.StatusCreated).JSON(newLobby)
+		return c.Redirect("/lobby/" + lobbyId) 
 	})
 }

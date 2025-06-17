@@ -1,28 +1,51 @@
 const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-const host = window.location.host; 
-const ws = new WebSocket(`${protocol}://${host}/ws`);
+const host = window.location.host;
+let ws;
+let pingIntervalId;
+let pongTimeoutId;
 
-ws.onopen = () => {
-  console.log("WebSocket connected");
-};
+function connect() {
+  ws = new WebSocket(`${protocol}://${host}/ws`);
 
-ws.onmessage = (event) => {
-  try {
-    const data = JSON.parse(event.data);
+  ws.onopen = () => {
+    console.log("WebSocket connected");
+  };
 
-    if (data.type === "update" && data.id && data.html) {
-      const target = document.getElementById(data.id);
-      if (target) {
-        target.innerHTML = data.html;
-      } else {
-        console.warn(`Element with id "${data.id}" not found.`);
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      console.log("WebSocket message received:", data);
+      
+      if (data.type === "pong") {
+        console.log("Received app-level pong (if you keep app pings)");
       }
-    }
-  } catch (e) {
-    console.error("Failed to handle WebSocket message:", e);
-  }
-};
 
-ws.onclose = () => {
-  console.log("WebSocket connection closed");
-};
+      // your existing update logic
+      if (data.action === "update" && data.id && data.html) {
+        const target = document.getElementById(data.id);
+        if (target) {
+          target.innerHTML = data.html;
+        } else {
+          console.warn(`Element with id "${data.id}" not found.`);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to handle WebSocket message:", e);
+    }
+  };
+
+  ws.onclose = () => {
+    console.log("WebSocket connection closed");
+    clearInterval(pingIntervalId);
+    clearTimeout(pongTimeoutId);
+    setTimeout(connect, 5_000);
+  };
+
+  ws.onerror = (err) => {
+    console.error("WebSocket error:", err);
+    ws.close();
+  };
+}
+
+// start the connection
+connect();
