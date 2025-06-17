@@ -11,9 +11,11 @@ import (
 )
 
 type Client struct {
-    UserID   string
-    Conn     *websocket.Conn
-    Lobbies  map[string]bool  // tracks which lobbies this client is in
+    UserID      string
+    Conn        *websocket.Conn
+    Lobbies     map[string]bool  // tracks which lobbies this client is in
+    CurrentPath string            // ← track what page the user is on
+
 }
 
 type Hub struct {
@@ -73,33 +75,40 @@ func (h *Hub) SendUpdate(msg interface{}) {
     h.broadcast <- b
 }
 
-// BroadcastToLobby sends a message only to clients subscribed to lobbyID.
 func (h *Hub) BroadcastToLobby(lobbyID string, msg interface{}) {
 	var payloadToSend []byte
 
-	// Detect if this is a member-list update
 	if m, ok := msg.(map[string]interface{}); ok {
 		if m["type"] == "member-list" {
+			// Safely extract path
+			path, ok := m["path"].(string)
+			log.Printf("Hub: member-list update for path %s", path)
+			if !ok {
+				log.Println("Hub: member-list update missing valid 'path'")
+				return
+			}
+
 			// Render the member-list template
 			var buf bytes.Buffer
 			tmpl := template.Must(
 				template.New("member-list").
 					ParseFiles(
-						"./views/lobby/index.html",
+						"./views/lobby/index.html", // Assuming this contains a {{define "member-list"}} section
 					),
 			)
-			err := tmpl.ExecuteTemplate(&buf, "member-list", m)
-			if err != nil {
+			if err := tmpl.ExecuteTemplate(&buf, "member-list", m); err != nil {
 				log.Println("Hub: template render error:", err)
 				return
 			}
 
-			// Wrap in a message with type + html
+			// Wrap into WS payload
 			payload := map[string]string{
 				"action": "update",
 				"id":     "member-list",
 				"html":   buf.String(),
+				"path":   path,
 			}
+			var err error
 			payloadToSend, err = json.Marshal(payload)
 			if err != nil {
 				log.Println("Hub: marshal error:", err)
@@ -108,7 +117,7 @@ func (h *Hub) BroadcastToLobby(lobbyID string, msg interface{}) {
 		}
 	}
 
-	// If we didn't handle it as member-list, send raw JSON
+	// Fallback: send raw if no special handling
 	if payloadToSend == nil {
 		var err error
 		payloadToSend, err = json.Marshal(msg)
@@ -118,9 +127,9 @@ func (h *Hub) BroadcastToLobby(lobbyID string, msg interface{}) {
 		}
 	}
 
-	// Broadcast to clients in the lobby
+	// Broadcast only to users on the correct page
 	for client := range h.clients {
-		if client.Lobbies[lobbyID] {
+		if client.Lobbies[lobbyID] && client.CurrentPath == "/lobby/"+lobbyID {
 			if err := client.Conn.WriteMessage(websocket.TextMessage, payloadToSend); err != nil {
 				log.Printf("Hub: write error to client %s: %v", client.UserID, err)
 				h.unregister <- client

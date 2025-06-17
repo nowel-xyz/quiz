@@ -2,6 +2,7 @@ package lobby
 
 import (
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/nowel-xyz/quiz/database/models"
@@ -37,7 +38,9 @@ func SetupLobbyJoinRoutes(router fiber.Router) {
 			"type":    "member-list",
 			"lobbyID": lobbyJoined.ID,
 			"Members": lobbyJoined.Members,
+			"path":    "/lobby/" + lobbyJoined.ID,
 		}
+		time.Sleep(500 * time.Millisecond)
 		web.HubInstance.BroadcastToLobby(lobbyJoined.ID, update)
 		return c.Redirect("/lobby/" + lobbyJoined.ID, fiber.StatusSeeOther)
 	})

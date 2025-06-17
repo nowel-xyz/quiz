@@ -42,10 +42,12 @@ func SetupWebSocket(app *fiber.App) {
 			return
 		}
 
+		initialPath := wsConn.Query("path")
 		client := &web.Client{
-			UserID:  user.ID.Hex(),
-			Conn:    wsConn,
-			Lobbies: make(map[string]bool),
+			UserID:      user.ID.Hex(),
+			Conn:        wsConn,
+			Lobbies:    make(map[string]bool),
+			CurrentPath: initialPath,
 		}
 		for _, lid := range lobbyIDs {
 			client.Lobbies[lid] = true
@@ -85,6 +87,7 @@ func SetupWebSocket(app *fiber.App) {
 			var req struct {
 				Action  string `json:"action"`
 				LobbyID string `json:"lobbyID"`
+				Path    string `json:"path,omitempty"`
 			}
 			if err := json.Unmarshal(msg, &req); err != nil {
 				continue
@@ -96,6 +99,11 @@ func SetupWebSocket(app *fiber.App) {
 				pong := map[string]string{"type": "pong"}
 				if b, err := json.Marshal(pong); err == nil {
 					wsConn.WriteMessage(fiberws.TextMessage, b)
+				}
+			case "setLocation":
+				if req.Path != "" {
+					client.CurrentPath = req.Path
+					log.Printf("Client %s set path to %s", client.UserID, req.Path)
 				}
 			}
 		}

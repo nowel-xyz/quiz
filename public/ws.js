@@ -4,10 +4,22 @@ let ws;
 let pingIntervalId;
 let pongTimeoutId;
 
+
+function sendCurrentPath() {
+  if (ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({
+      action: "setLocation",
+      path: window.location.pathname,
+    }));
+  }
+}
+
 function connect() {
-  ws = new WebSocket(`${protocol}://${host}/ws`);
+  ws = new WebSocket(`${protocol}://${host}/ws?path=${encodeURIComponent(window.location.pathname)}`);
 
   ws.onopen = () => {
+     sendCurrentPath();
+    window.addEventListener("popstate", sendCurrentPath);
     console.log("WebSocket connected");
   };
 
@@ -15,7 +27,7 @@ function connect() {
     try {
       const data = JSON.parse(event.data);
       console.log("WebSocket message received:", data);
-      
+
       if (data.type === "pong") {
         console.log("Received app-level pong (if you keep app pings)");
       }
@@ -46,6 +58,8 @@ function connect() {
     ws.close();
   };
 }
+
+
 
 // start the connection
 connect();
