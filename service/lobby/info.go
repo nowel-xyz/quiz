@@ -27,9 +27,9 @@ func GetLobbyData(c *fiber.Ctx, lobbyID string, user models.User) (*utils.Lobby,
 
 	memberIDs := make([]string, len(lobby.Members))
 	for i, m := range lobby.Members {
-		memberIDs[i] = m.UserID
+		memberIDs[i] = m.ID
 	}
-	if !utils.ContainsMember(memberIDs, user.UserID) && lobby.HostID != user.UserID {
+	if !utils.ContainsMember(memberIDs, user.ID) && lobby.HostID != user.ID {
 		return nil, fiber.NewError(fiber.StatusForbidden, "You're not a member of this lobby")
 	}
 

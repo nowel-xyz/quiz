@@ -44,7 +44,7 @@ func SetupWebSocket(app *fiber.App) {
 
 		initialPath := wsConn.Query("path")
 		client := &web.Client{
-			UserID:      user.ID.Hex(),
+			UserID:      user.ID,
 			Conn:        wsConn,
 			Lobbies:    make(map[string]bool),
 			CurrentPath: initialPath,

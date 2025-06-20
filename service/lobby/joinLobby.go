@@ -29,11 +29,11 @@ func JoinLobbyByID(c *fiber.Ctx, lobbyID string, user models.User) (*utils.Lobby
 	// Step 2: Add user if not already a member
 	memberIDs := make([]string, len(lobby.Members))
 	for i, m := range lobby.Members {
-		memberIDs[i] = m.UserID
+		memberIDs[i] = m.ID
 	}
-	if !utils.ContainsMember(memberIDs, user.UserID) {
+	if !utils.ContainsMember(memberIDs, user.ID) {
 		lobby.Members = append(lobby.Members, models.LobbyUser{
-			UserID:   user.UserID,
+			ID:       user.ID,
 			Username: user.Username,
 			Email:    user.Email,
 			Roles:    user.Roles,

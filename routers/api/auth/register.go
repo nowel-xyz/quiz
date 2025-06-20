@@ -52,8 +52,8 @@ func SetupRegisterRoutes(router fiber.Router) {
 
 		ip := c.IP()
 		user := models.User{
-			ID:       primitive.NewObjectID(),
-			UserID:   id,
+			ObjID:       primitive.NewObjectID(),
+			ID:   id,
 			Username: body.Username,
 			Password: string(hashed),
 			Salt:     string(salt),

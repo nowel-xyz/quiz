@@ -38,7 +38,7 @@ func SetupLobbyJoinRoutes(router fiber.Router) {
 			return err
 		}
 
-		web.HubInstance.AddUserToLobby(user.ID.Hex(), lobbyJoined.ID)
+		web.HubInstance.AddUserToLobby(user.ID, lobbyJoined.ID)
 		update := map[string]interface{}{
 			"type":    "member-list",
 			"lobbyID": lobbyJoined.ID,

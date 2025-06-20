@@ -39,7 +39,7 @@ func GetLobbyIDsForUser(ctx context.Context, user models.User) ([]string, error)
 
             // check membership
             for _, m := range lob.Members {
-                if m.UserID == user.UserID {
+                if m.ID == user.ID {
                     // extract the lobbyID from the key
                     // key is "lobby:<lobbyID>"
                     parts := strings.SplitN(key, ":", 2)

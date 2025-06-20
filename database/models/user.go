@@ -13,8 +13,8 @@ type IPEntry struct {
 }
 
 type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	UserID   string             `bson:"id"`
+	ObjID   primitive.ObjectID `bson:"_id,omitempty"`
+	ID      string             `bson:"id"`
 	Username string             `bson:"username"`
 	Password string             `bson:"password"`
 	Salt     string             `bson:"salt"`
@@ -26,7 +26,7 @@ type User struct {
 
 
 type LobbyUser struct {
-	UserID   string             `json:"id"`
+	ID   string             `json:"id"`
 	Username string             `json:"username"`
 	Email    string             `json:"email"`
 	Roles    []string           `json:"roles"`

@@ -11,6 +11,7 @@ import (
 	"github.com/nowel-xyz/quiz/database"
 	"github.com/nowel-xyz/quiz/database/models"
 	"github.com/nowel-xyz/quiz/routers/api/lobby/utils"
+	"github.com/nowel-xyz/quiz/utils/web"
 )
 
 func SetupLobbyCreateRoutes(router fiber.Router) {
@@ -27,7 +28,7 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			if err := c.BodyParser(body); err != nil {
 				return c.Status(400).SendString("bad request")
 			}
-}
+		}
 		code, err := utils.GenerateCode(10)
 		if err != nil {
 			log.Fatal(err)
@@ -39,7 +40,7 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 			Invite: utils.LobbyInvite{
 				Code: code,
 			},
-			HostID:    user.UserID,
+			HostID:    user.ID,
 			QuizID:    body.QuizID,
 			Settings:  body.Settings,
 			CreatedAt: time.Now().Format(time.RFC3339),
@@ -69,7 +70,7 @@ func SetupLobbyCreateRoutes(router fiber.Router) {
 		}
 
 		log.Printf("Lobby created: lobbyId=%s inviteCode=%s", lobbyId, code)
-
-		return c.Redirect("/lobby/" + lobbyId) 
+		web.HubInstance.AddUserToLobby(user.ID, lobbyId)
+		return c.Redirect("/lobby/" + lobbyId)	
 	})
 }

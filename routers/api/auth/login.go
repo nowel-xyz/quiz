@@ -88,7 +88,7 @@ func SetupLoginRoutes(router fiber.Router) {
 		if token == "" {
 			j := jwt.NewWithClaims(jwt.SigningMethodHS256, 
 				jwt.MapClaims{
-					"id": user.UserID, 
+					"id": user.ID, 
 					"email": user.Email, 
 					"exp": time.Now().Add(7 * 24 * time.Hour).Unix(),
 				},

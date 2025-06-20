@@ -131,6 +131,7 @@ func (h *Hub) BroadcastToLobby(lobbyID string, msg interface{}) {
 	for client := range h.clients {
 		log.Printf("Hub: broadcasting to client %s for lobby %s user path %s", client.UserID, lobbyID, client.CurrentPath)
 		if client.Lobbies[lobbyID] && client.CurrentPath == "/lobby/"+lobbyID {
+			log.Printf("Hub: sending update to client %s for lobby %s", client.UserID, lobbyID)
 			if err := client.Conn.WriteMessage(websocket.TextMessage, payloadToSend); err != nil {
 				log.Printf("Hub: write error to client %s: %v", client.UserID, err)
 				h.unregister <- client
@@ -149,3 +150,4 @@ func (h *Hub) AddUserToLobby(userID, lobbyID string) {
 		}
 	}
 }
+	

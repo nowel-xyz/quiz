@@ -57,9 +57,12 @@ function connect() {
     console.error("WebSocket error:", err);
     ws.close();
   };
+
+  router.afterEach((to) => {
+    sendCurrentPath(to.fullPath);
+  });
+
 }
 
-
-
-// start the connection
 connect();
+
