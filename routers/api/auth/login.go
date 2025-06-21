@@ -79,7 +79,7 @@ func SetupLoginRoutes(router fiber.Router) {
 			text = "A new login attempt was made from a new IP: " + ip
 		}
 
-		_, err = users.UpdateOne(context.TODO(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"ips": user.IPs}})
+		_, err = users.UpdateOne(context.TODO(), bson.M{"_id": user.ObjID}, bson.M{"$set": bson.M{"ips": user.IPs}})
 		if err != nil {
 			return c.Status(500).SendString("db error")
 		}
@@ -88,14 +88,13 @@ func SetupLoginRoutes(router fiber.Router) {
 		if token == "" {
 			j := jwt.NewWithClaims(jwt.SigningMethodHS256, 
 				jwt.MapClaims{
-					"id": user.ID, 
-					"email": user.Email, 
-					"exp": time.Now().Add(7 * 24 * time.Hour).Unix(),
+					"id":    user.ID,
+					"email": user.Email,
+					"exp":   time.Now().Add(7 * 24 * time.Hour).Unix(),
 				},
 			)
-			
 			token, _ = j.SignedString(utils.GetJWTKey())
-			_, _ = users.UpdateOne(context.TODO(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"cookie": token}})
+			_, _ = users.UpdateOne(context.TODO(), bson.M{"_id": user.ObjID}, bson.M{"$set": bson.M{"cookie": token}})
 		}
 
 		c.Cookie(&fiber.Cookie{
